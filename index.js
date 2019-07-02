@@ -1,30 +1,28 @@
-const http = require('http');
-const fs = require('fs');
-const wss = require('./websockets-server');
+const express = require('express');
+const app = express();
+const httpServer = require('http').createServer(app);
+const io = require('socket.io')(httpServer);
 
-const extract = require('./extract');
-
-
-const handleError = (err, res) => {
-    res.setHeader('Content-Type', 'text/html');
-    res.writeHead(404);
-    res.end("<h2>Page is not found</h2>");
-};
-
-const server = http.createServer((req, res) => {
-    console.log('Responding to a request.');
-
-    const filePath = extract(req.url);
-
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            handleError(err, res);
-            return;
-        } else {
-            res.setHeader('Content-Type', 'text/html');
-            res.end(data);
-        }
-    });
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/app/index.html');
 });
 
-server.listen(3000);
+app.use('/favicon.ico', express.static('app/favicon.ico'));
+
+
+io.on('connection', socket => {
+    console.log('a user connected');
+
+    socket.on('chat message', msg => {
+        io.emit('chat message', msg);
+        console.log('message: ' + msg);
+      });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+      });
+  });
+
+httpServer.listen(3000, () => {
+    console.log('listening on port: 3000');
+});
