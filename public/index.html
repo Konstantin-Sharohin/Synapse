@@ -46,6 +46,10 @@
         .messages li:nth-child(odd) {
             background: #eee;
         }
+
+        .username-container {
+            margin: 2rem;
+        }
     </style>
 </head>
 
@@ -72,8 +76,8 @@
 
             $('form').submit(e => {
                 e.preventDefault();
-                socket.emit('chat message', {message: $('.message').val()});
-                $('.message').val(''); 
+                socket.emit('chat message', { message: $('.message').val() });
+                $('.message').val('');
                 return false;
             });
 
@@ -82,15 +86,25 @@
             });
 
             $('.change-username-btn').click(() => {
-                socket.emit('change username', {username: $('.username').val()});
+                socket.emit('change username', {username: $('.username').val() });
             });
 
             $('.message').bind('keypress', () => {
-                socket.emit('typing');
+                socket.emit('typing', {username: $('.username').val(), message: 'is typing...'});
             });
 
-            socket.on('typing', data => $('.info').html(`<i>${data.username} is typing a message...</i>`));
-        });
+            socket.on('notifyTyping', data => {
+                $('.info').html(`<i>${data.username} ${data.message}...</i>`);
+            });
+
+            $('.message').bind('keyup', () => {
+                socket.emit('stopTyping');
+            });
+
+            socket.on("notifyStopTyping", () =>  {
+                setTimeout(() => $('.info').html(''), 2000);
+            });
+        })
     </script>
 </body>
 
