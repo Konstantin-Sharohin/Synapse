@@ -1,21 +1,16 @@
 {
-  "name": "synapse",
+  "name": "chat-app",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node index.js"
   },
   "author": "Konstantin Sharohin",
   "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.19.1"
-  },
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^2.2.0",
-    "ws": "^7.0.1"
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
   }
 }

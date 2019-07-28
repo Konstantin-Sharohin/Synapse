@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Simple Chat</title>
+  <link rel="icon" href="favicon.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 13px Helvetica, Arial;
+    }
+
+    form {
+      background: #FFC;
+      padding: 1em;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    form input {
+      border-style: solid;
+      border-width: 1px;
+      padding: 10px;
+      width: 85%;
+      margin-right: .5%;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(92, 130, 173);
+      color: #ffffff;
+      border: none;
+      padding: 10px;
+      margin-left: 2%;
+      border-radius: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+  <script src="../../socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous">
+    </script>
+</head>
+
+<body>
+  <ul class="messages"></ul>
+  <p class="info"></p>
+  <form action="" method="POST" id="chatForm">
+    <input class="txt" autocomplete="off" autofocus="on" placeholder="Type your message here..." />
+    <button>Send</button>
+  </form>
+
+  <script>
+    $(() => {
+      const socket = io.connect('http://localhost:3000');
+
+      // references
+      const inputElem = $('.txt');
+      const messagesElem = $('.messages');
+      const info = $('.info');
+
+      // ask for username
+      const username = prompt('Please enter your name');
+      socket.emit('set_username', { 'username': username });
+
+      const isTyping = () => {
+        socket.emit('typing');
+      };
+
+      inputElem.on('keypress', isTyping);
+
+      // submit text message without reload/refresh the page
+      $('form').submit(e => {
+        e.preventDefault();
+        socket.emit('chat_message', inputElem.val());
+        inputElem.val('');
+      });
+
+      // append the chat text message
+      socket.on('chat_message', msg => {
+        messagesElem.append($('<li>').html(msg));
+      });
+
+      // show if the user is typing
+      socket.on('is_typing', data => {
+        info.html(data);
+        setTimeout(() => info.html(''), 2000);
+      });
+
+      // append text if someone is online
+      socket.on('is_online', username => {
+        messagesElem.append($('<li>').html(username));
+      });
+
+      // append text if someone is offline
+      socket.on('disconnect', username => {
+        messagesElem.append($('<li>').html(username));
+      });
+    });
+
+  </script>
+</body>
+
+</html>
